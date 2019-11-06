@@ -1,4 +1,5 @@
-#!flask/bin/python
+#!/usr/bin/python2.7 -u
+# coding=utf-8
 from flask import Flask, jsonify, json
 from fsdb import Fsdb
 
