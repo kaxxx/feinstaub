@@ -97,6 +97,7 @@ def cmd_firmware_ver():
     ser.write(construct_command(CMD_FIRMWARE))
     d = read_response()
     process_version(d)
+
 def cmd_set_id(id):
     id_h = (id>>8) % 256
     id_l = id % 256
@@ -132,7 +133,7 @@ if __name__ == "__main__":
     cmd_set_mode(MODE_QUERY);
     #while True:
     cmd_set_sleep(0)
-    for t in range(1):
+    for t in range(15):
         values = cmd_query_data();
         if values is not None and len(values) == 2:
           print("PM2.5: ", values[0], ", PM10: ", values[1])
