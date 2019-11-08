@@ -1,7 +1,7 @@
 <html>
 <head>
 	<!-- Load c3.css -->
-	<link href="{{ url_for('static',    filename='c3/c3.min.css') }}" rel="stylesheet">
+	<link href="{{ url_for('static',    filename='c3/c3.css') }}" rel="stylesheet">
 
 	<!-- Load d3.js and c3.js -->
 	<script src="https://d3js.org/d3.v5.js"></script>
@@ -13,28 +13,46 @@
 
 function load(){
 	console.log("loading ...");
-	var d = d3.json("/fs/api/v1.0/lastdays/1", draw);
+	var d = d3.json("/fs/api/v1.0/lastdays/{{days}}").then(draw);
+
 }
 
 function draw(data){
-	console.log("draw...");
-	console.log(data);
+	scala = []; //d3.keys(data);
+	scala.push('x');
+
+	pall = d3.entries(data);
+
+	ppm10data = [];
+	ppm10data.push('ppm10');
+
+	ppm25data = [];
+	ppm25data.push('ppm2.5');
+
+	p10 = d3.values(data);
+	pall.forEach(function (p){
+		if (p.key != "meta"){
+			scala.push(p.key);
+			ppm10data.push(p.value[0].ppm10);
+			ppm25data.push(p.value[0].ppm25);
+		}
+	});
+	console.log(scala);
 	var chart = c3.generate({
 	    data: {
 	        x: 'x',
-	//        xFormat: '%Y%m%d', // 'xFormat' can be used as custom format of 'x'
+	        xFormat: '%Y-%m-%d %H:%M:%S', // 'xFormat' can be used as custom format of 'x'
 	        columns: [
-	            ['x', '2013-01-01', '2013-01-02', '2013-01-03', '2013-01-04', '2013-01-05', '2013-01-06'],
-	//            ['x', '20130101', '20130102', '20130103', '20130104', '20130105', '20130106'],
-	            ['data1', 30, 200, 100, 400, 150, 250],
-	            ['data2', 130, 340, 200, 500, 250, 350]
+	        	scala,
+	            ppm10data,
+	            ppm25data
 	        ]
 	    },
 	    axis: {
 	        x: {
 	            type: 'timeseries',
 	            tick: {
-	                format: '%Y-%m-%d'
+	                format: '%Y-%m-%d %H:%M:%S'
 	            }
 	        }
 	    }
@@ -44,7 +62,6 @@ function draw(data){
 $( document ).ready(function() {
 	console.log("start...");
 	load();
-
 });
 </script>
 <div id="chart"></div>
