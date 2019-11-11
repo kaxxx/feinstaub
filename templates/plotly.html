@@ -81,7 +81,7 @@ type="text/javascript"></script>
       x: x25,
       y: y25,
       type: 'scatter',
-      name: 'ppm25'
+      name: 'ppm2.5'
     };
     var trace2 = {
       x: x10,
@@ -89,7 +89,7 @@ type="text/javascript"></script>
       type: 'scatter',
       name: 'ppm10'
     };
-    var data = [trace1, trace2];
+    var data = [trace2, trace1];
     Plotly.newPlot('diagram', data);
     $("#spinner").hide();
     $("#diagram").show();
