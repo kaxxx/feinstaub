@@ -28,9 +28,10 @@ type="text/javascript"></script>
   });
 
   $(window).resize(function(){
-    console.log("resizing ...");
+    if ($('#diagram').html() == ""){
+        return;
+    }
     reDrawData();
-    //Plotly.restyle('diagram', {});
   });
 
   function mkArray(json){
