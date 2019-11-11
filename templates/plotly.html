@@ -7,25 +7,34 @@
 type="text/javascript"></script>                                                                                                  
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <!--script src="./jquery.switchButton.js"></script-->
+
+<div id="meta"></div>
+<div id="ppm25" style="float:left;"></div>                                                                                        
+<div id="ppm10" style="float:right;"></div>
+<div id="spinner"><img src="https://faviconer.net/preloaders/89/Fading%20line.gif"/></div>
+<div id="diagram"></div>
 <script>
-    var x10=new Array();                                                                                                            
-    var y10=new Array();    
-    var x25=new Array();                                                                                                            
-    var y25=new Array();    
-                                                                                                                  
+    var x10=new Array();
+    var y10=new Array();
+    var x25=new Array();
+    var y25=new Array();
+
   $( document ).ready(function() {
+    $("#spinner").show();
     // start one time
     readData();
+  });
+
+  $(window).resize(function(){
+    console.log("resizing ...");
+    reDrawData();
+    //Plotly.restyle('diagram', {});
   });
 
   function mkArray(json){
     console.log(json);
     $.each(json, function(key, obj) {
       console.log(key);
-	  /*
-	  console.log(obj[0].ppm10);
-	  console.log(obj[0].ppm25);
-      */
 
 	  x10.push(key);
 	  y10.push(obj[0].ppm10);
@@ -55,35 +64,44 @@ type="text/javascript"></script>
   }
 
   function readData(){
-   $.ajax({                                          
+   $.ajax({
+     {% if days %}
       url: "/fs/api/v1.0/pl/lastdays/{{days}}",
-      async: false,
+     {% elif sfrom %}
+      url: "/fs/api/v1.0/pl/range/{{sfrom}}/{{sto}}",
+     {% endif %}
+      async: true,
       timeout: 99999999,
       success: mkArray2
     });
   }
 
   function drawData(){
-    var trace1 = {                                                                                                                
-      x: x25,                                                                                                           
-      y: y25,                                                                                                        
+    var trace1 = {
+      x: x25,
+      y: y25,
       type: 'scatter',
-      name: 'ppm25'                                                                                                             
-    };                                                                                                                            
-    var trace2 = {                                                                                                                
-      x: x10,                                                                                                            
-      y: y10,                                                                                                          
+      name: 'ppm25'
+    };
+    var trace2 = {
+      x: x10,
+      y: y10,
       type: 'scatter',
-      name: 'ppm10'                                                                                                             
-    };                                                                                                                            
-    var data = [trace1, trace2];                                                                                                  
+      name: 'ppm10'
+    };
+    var data = [trace1, trace2];
     Plotly.newPlot('diagram', data);
-  }                                                                                                                         
-                                                                                                                                  
+    $("#spinner").hide();
+    $("#diagram").show();
+  }
+
+  function reDrawData(){
+    var update = {
+      width: $( "body" ).width()
+    };
+    console.log(update);
+    Plotly.relayout('diagram', update);
+  }
 </script>
-<div id="meta"></div>
-<div id="ppm25" style="float:left;"></div>                                                                                        
-<div id="ppm10" style="float:right;"></div>                                                                                       
-<div id="diagram"></div>                                                                                                          
 </body>                                                                                                                           
 </html>           

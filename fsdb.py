@@ -153,14 +153,38 @@ class Fsdb:
         self.connection.close()
         return data_ppm
 
-    def getRange(self, dfrom, dto):
-        #xdate = datetime.datetime.now() - datetime.timedelta(days=int(days))
+    def getRangePL(self, dfrom, dto):
         print "von: " + str(dfrom)
         print "bis: " + str(dto)
-        #startdate = datetime.strptime(dfrom, "%Y-%m-%d %H:%M:%S")   #(xdate.strftime("%Y-%m-%d %H:%M:%S"),)
-        #enddate = datetime.strptime(dto, "%Y-%m-%d %H:%M:%S")
 
-        #datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+        data_ppm = {}
+        data_ppm['meta'] = []
+
+        try:
+            sql = "select * from readings where time between %s AND %s;"
+            self.mycursor.execute(sql, (dfrom, dto))
+            myresult = self.mycursor.fetchall()
+            data_ppm['meta'] = {'from': dfrom.strftime("%d.%m.%Y %H:%M:%S"),
+                                'to': dto.strftime("%d.%m.%Y %H:%M:%S"),
+                                'results': str(self.mycursor.rowcount)}
+
+            data_ppm["x10"] = [];
+            data_ppm["y10"] = [];
+
+            data_ppm["x25"] = [];
+            data_ppm["y25"] = [];
+
+            for x in myresult:
+                self.mkjsonPL(x, data_ppm)
+
+        except mysql.connector.Error as error:
+            print "error finding data in db: {}".format(error)
+        self.connection.close()
+        return data_ppm
+
+    def getRange(self, dfrom, dto):
+        print "von: " + str(dfrom)
+        print "bis: " + str(dto)
 
         data_ppm = {}
         data_ppm['meta'] = []
