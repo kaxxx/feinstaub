@@ -3,6 +3,7 @@
 
 from flask import Flask, jsonify, json, render_template
 from fsdb import Fsdb
+from datetime import datetime
 
 app = Flask(__name__, template_folder='./templates', static_folder='./static')
 
@@ -10,18 +11,45 @@ app = Flask(__name__, template_folder='./templates', static_folder='./static')
 def home():
     return render_template("index.html")
 
+@app.route("/plotly/<days>")
+def plotly(days):
+    return render_template("plotly.html", days=days)
+
 @app.route("/lastdays/<days>")
 def lastdays(days):
     return render_template("index.html", days=days)
 
+@app.route("/range/<sfrom>/<sto>")
+def range(sfrom, sto):
+    print str(sfrom)
+    print str(sto)
+    #print render_template("range.html", sfrom=sfrom, sto=sto)
+    return render_template("range.html", sfrom=sfrom, sto=sto)
+
+@app.route('/fs/api/v1.0/range/<sfrom>/<sto>', methods=['GET'])
+def get_range(sfrom, sto):
+    print str(sfrom)
+    print str(sto)
+    dfrom = datetime.strptime(sfrom, "%Y-%m-%d %H:%M:%S")
+    dto = datetime.strptime(sto, "%Y-%m-%d %H:%M:%S")
+    db = Fsdb()
+    return jsonify(db.getRange(dfrom,dto))
+
 @app.route('/fs/api/v1.0/lastdays/<days>', methods=['GET'])
-def get_tasks(days):
+def get_lastdays(days):
     db = Fsdb()
     return jsonify(db.getLastDays(days))
+    #return json.dumps(db.getLastDays(days));
+
+@app.route('/fs/api/v1.0/pl/lastdays/<days>', methods=['GET'])
+def get_lastdaysPl(days):
+    db = Fsdb()
+    return jsonify(db.getLastDaysPl(days))
     #return json.dumps(db.getLastDays(days));
 
 def get_data():
     return
 
 if __name__ == '__main__':
-    app.run(debug=True, host= '0.0.0.0')
+    app.run(debug=True, threaded=True, host= '0.0.0.0')
+

@@ -3,7 +3,7 @@
 import datetime
 
 import mysql.connector
-import time, json
+import time, json, thread
 
 
 class Fsdb:
@@ -29,6 +29,7 @@ class Fsdb:
 
         except mysql.connector.Error as error:
             print("Failed to insert record into readings table {}".format(error))
+        self.connection.close()
 
     def writeTime(self, ppm10, ppm2_5, time):
         try:
@@ -43,6 +44,7 @@ class Fsdb:
 
         except mysql.connector.Error as error:
             print("Failed to insert record into readings table {}".format(error))
+        self.connection.close()
 
     def hasTime(self, searchtime):
         # global connection
@@ -52,6 +54,7 @@ class Fsdb:
             checktime = time.strptime(searchtime, '%Y-%m-%d %H:%M:%S')
         except:
             print ("cannot parse timestamp: " + searchtime)
+            self.connection.close()
             return True
 
         try:
@@ -69,11 +72,14 @@ class Fsdb:
 
                 if str(searchtime) == str(x[1]):
                     print(x)
+                    self.connection.close()
                     return True
                 else:
+                    self.connection.close()
                     return False
 
         except mysql.connector.Error as error:
+            self.connection.close()
             print("Failed to read readings table {}".format(error))
 
     def lastTime(self):
@@ -82,10 +88,13 @@ class Fsdb:
             rows_count = self.mycursor.execute(sql)
             myresult = self.mycursor.fetchall()
             if rows_count is not None:
+                self.connection.close()
                 return datetime.date(2000, 1, 1)
             else:
+                self.connection.close()
                 return myresult[0][0]
         except:
+            self.connection.close()
             print ("error finding last timestamp")
 
     def getLastDays(self, days):
@@ -101,17 +110,95 @@ class Fsdb:
             print "bis: " + str(xdate)
             self.mycursor.execute(sql,startdate)
             myresult = self.mycursor.fetchall()
-            data_ppm['meta'].append({'from': str(xdate.strftime("%Y-%m-%d %H:%M:%S")), 'to': str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),'results':str(self.mycursor.rowcount)})
+            data_ppm['meta'].append({'from': str(xdate.strftime("%Y-%m-%d %H:%M:%S")),
+                                     'to': str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                                     'results': str(self.mycursor.rowcount)})
             for x in myresult:
-                dkey = x[1].strftime("%Y-%m-%d %H:%M:%S")
-                data_ppm[dkey]=[]
-                data_ppm[dkey].append({
-                    'ppm10': x[2],
-                    'ppm25': x[3]
-                })
+                self.mkjson(x, data_ppm)
+                #thread.start_new_thread(self.mkjson, (x, data_ppm, xdate))
 
         except mysql.connector.Error as error:
             print "error finding data in db: {}".format(error)
+        self.connection.close()
+        return data_ppm
+
+    def getLastDaysPl(self, days):
+        xdate = datetime.datetime.now() - datetime.timedelta(days=int(days))
+        print "von: "+str(datetime.datetime.now())
+
+        data_ppm = {}
+        data_ppm['meta']=[]
+
+        try:
+            sql = "select * from readings where time between %s AND now();"
+            startdate = (xdate.strftime("%Y-%m-%d %H:%M:%S"),)
+            print "bis: " + str(xdate)
+            self.mycursor.execute(sql,startdate)
+            myresult = self.mycursor.fetchall()
+            data_ppm['meta'] = {'from': str(xdate.strftime("%Y-%m-%d %H:%M:%S")),
+                                     'to': str(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")),
+                                     'results': str(self.mycursor.rowcount)}
+            data_ppm["x10"] = [];
+            data_ppm["y10"] = [];
+
+            data_ppm["x25"] = [];
+            data_ppm["y25"] = [];
+
+            for x in myresult:
+                self.mkjsonPL(x, data_ppm)
+                #thread.start_new_thread(self.mkjson, (x, data_ppm, xdate))
+
+        except mysql.connector.Error as error:
+            print "error finding data in db: {}".format(error)
+        self.connection.close()
+        return data_ppm
+
+    def getRange(self, dfrom, dto):
+        #xdate = datetime.datetime.now() - datetime.timedelta(days=int(days))
+        print "von: " + str(dfrom)
+        print "bis: " + str(dto)
+        #startdate = datetime.strptime(dfrom, "%Y-%m-%d %H:%M:%S")   #(xdate.strftime("%Y-%m-%d %H:%M:%S"),)
+        #enddate = datetime.strptime(dto, "%Y-%m-%d %H:%M:%S")
+
+        #datetime.strptime('Jun 1 2005  1:33PM', '%b %d %Y %I:%M%p')
+
+        data_ppm = {}
+        data_ppm['meta'] = []
+
+        try:
+            sql = "select * from readings where time between %s AND %s;"
+            self.mycursor.execute(sql, (dfrom, dto))
+            myresult = self.mycursor.fetchall()
+            data_ppm['meta'].append({'from': str(dfrom.strftime("%Y-%m-%d %H:%M:%S")),
+                                     'to': str(dto.strftime("%Y-%m-%d %H:%M:%S")),
+                                     'results': str(self.mycursor.rowcount)})
+            for x in myresult:
+                self.mkjson(x, data_ppm)
+                #thread.start_new_thread(self.mkjson, (x, data_ppm, xdate))
+
+        except mysql.connector.Error as error:
+            print "error finding data in db: {}".format(error)
+        self.connection.close()
+        return data_ppm
+
+    def mkjson(self, x, data_ppm):
+        dkey = x[1].strftime("%Y-%m-%d %H:%M:%S")
+        data_ppm[dkey] = []
+        data_ppm[dkey].append({
+             'ppm10': x[2],
+             'ppm25': x[3]
+        })
+        return data_ppm
+
+    def mkjsonPL(self, x, data_ppm):
+        dkey = x[1].strftime("%Y-%m-%d %H:%M:%S")
+        #data_ppm[0] = []
+
+        data_ppm["x10"].append(dkey);
+        data_ppm["y10"].append(x[2]);
+
+        data_ppm["x25"].append(dkey);
+        data_ppm["y25"].append(x[3]);
 
         return data_ppm
 
@@ -119,7 +206,12 @@ class Fsdb:
         self.connection.close()
 
 #db = Fsdb()
-#db.getLastDays(22)
+
+#dfrom = datetime.datetime.strptime("2019-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
+#dto = datetime.datetime.strptime("2019-01-02 00:00:00", "%Y-%m-%d %H:%M:%S")
+#print(db.getRange(dfrom, dto))
+
+#print(db.getLastDays(22))
 # db.write(1.1,2.2)
 #print (db.hasTime("2018-06-06 11:41:02"))
 #ckdate = datetime.strptime("2018-06-06 11:41:02", "%Y-%m-%d %H:%M:%S")

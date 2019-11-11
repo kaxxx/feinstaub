@@ -1,0 +1,89 @@
+<html>                                                                                                                            
+<head>
+  <link type="text/css" rel="stylesheet" href="{{ url_for('static',    filename='plotly.css') }}" />
+</head>
+<body>                                                                                                                            
+<script src="https://code.jquery.com/jquery-latest.js"                                                                            
+type="text/javascript"></script>                                                                                                  
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<!--script src="./jquery.switchButton.js"></script-->
+<script>
+    var x10=new Array();                                                                                                            
+    var y10=new Array();    
+    var x25=new Array();                                                                                                            
+    var y25=new Array();    
+                                                                                                                  
+  $( document ).ready(function() {
+    // start one time
+    readData();
+  });
+
+  function mkArray(json){
+    console.log(json);
+    $.each(json, function(key, obj) {
+      console.log(key);
+	  /*
+	  console.log(obj[0].ppm10);
+	  console.log(obj[0].ppm25);
+      */
+
+	  x10.push(key);
+	  y10.push(obj[0].ppm10);
+
+	  x25.push(key);
+	  y25.push(obj[0].ppm25);
+	  drawData();
+
+    });
+  }
+
+  function mkArray2(json){
+    x10 = json["x10"];
+    y10 = json["y10"];
+
+    x25 = json["x25"];
+    y25 = json["y25"];
+
+    $("#meta").html(niceMeta(json["meta"]));
+
+    console.log(json["meta"]["from"]);
+    drawData();
+  }
+
+  function niceMeta(meta){
+    return meta["results"]+" results - from: "+meta['from']+" to: "+meta['to'];
+  }
+
+  function readData(){
+   $.ajax({                                          
+      url: "/fs/api/v1.0/pl/lastdays/{{days}}",
+      async: false,
+      timeout: 99999999,
+      success: mkArray2
+    });
+  }
+
+  function drawData(){
+    var trace1 = {                                                                                                                
+      x: x25,                                                                                                           
+      y: y25,                                                                                                        
+      type: 'scatter',
+      name: 'ppm25'                                                                                                             
+    };                                                                                                                            
+    var trace2 = {                                                                                                                
+      x: x10,                                                                                                            
+      y: y10,                                                                                                          
+      type: 'scatter',
+      name: 'ppm10'                                                                                                             
+    };                                                                                                                            
+    var data = [trace1, trace2];                                                                                                  
+    Plotly.newPlot('diagram', data);
+  }                                                                                                                         
+                                                                                                                                  
+</script>
+<div id="meta"></div>
+<div id="ppm25" style="float:left;"></div>                                                                                        
+<div id="ppm10" style="float:right;"></div>                                                                                       
+<div id="diagram"></div>                                                                                                          
+</body>                                                                                                                           
+</html>           

@@ -13,15 +13,10 @@
 
 function load(){
 	console.log("loading ...");
-	//var d = d3.json("/fs/api/v1.0/lastdays/{{days}}").then(draw);
-	$.ajax({
-	  url: "/fs/api/v1.0/lastdays/{{days}}",
-	  type: 'GET',
-	  async: false,
-	  dataType: 'json',
-	  success: draw,
-	  error: handleError
-	})
+	console.log( "from: "+encodeURIComponent("{{sfrom}}") );
+	console.log("to: "+encodeURIComponent("{{sto}}") );
+
+	var d = d3.json("/fs/api/v1.0/range/"+encodeURIComponent("{{sfrom}}")+"/"+encodeURIComponent("{{sto}}")).then(draw);
 }
 
 function handleError(error){
@@ -48,7 +43,7 @@ function draw(data){
 			ppm25data.push(p.value[0].ppm25);
 		}
 	});
-	console.log(scala);
+	//console.log(scala);
 	var chart = c3.generate({
 	    data: {
 	        x: 'x',
