@@ -19,6 +19,8 @@ type="text/javascript"></script>
     var x25=new Array();
     var y25=new Array();
 
+    var sendDate = (new Date()).getTime();
+
   $( document ).ready(function() {
     $("#spinner").show();
     // start one time
@@ -47,6 +49,10 @@ type="text/javascript"></script>
   }
 
   function mkArray2(json){
+    var receiveDate = (new Date()).getTime();
+    var responseTimeMs = receiveDate - sendDate;
+    console.log("time: "+responseTimeMs);
+
     x10 = json["x10"];
     y10 = json["y10"];
 
@@ -55,7 +61,6 @@ type="text/javascript"></script>
 
     $("#meta").html(niceMeta(json["meta"]));
 
-    console.log(json["meta"]["from"]);
     drawData();
   }
 

@@ -4,6 +4,7 @@
 from flask import Flask, jsonify, json, render_template
 from fsdb import Fsdb
 from datetime import datetime
+from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__, template_folder='./templates', static_folder='./static')
 
@@ -66,5 +67,7 @@ def get_data():
     return
 
 if __name__ == '__main__':
-    app.run(debug=True, threaded=True, host= '0.0.0.0')
+    #app.run(debug=True, threaded=True, host= '0.0.0.0')
+    http_server = WSGIServer(('', 5000), app)
+    http_server.serve_forever()
 
