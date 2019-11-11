@@ -18,10 +18,12 @@ def plotly(days):
 
 @app.route("/plotly/range/<sfrom>/<sto>")
 def rangePl(sfrom, sto):
-    print str(sfrom)
-    print str(sto)
-    #print render_template("range.html", sfrom=sfrom, sto=sto)
     return render_template("plotly.html", sfrom=sfrom, sto=sto)
+
+@app.route("/plotly/range/<sfrom>")
+def rangePlfrom(sfrom):
+    return render_template("plotly.html", sfrom=sfrom)
+
 
 @app.route("/lastdays/<days>")
 def lastdays(days):
@@ -29,15 +31,10 @@ def lastdays(days):
 
 @app.route("/range/<sfrom>/<sto>")
 def range(sfrom, sto):
-    print str(sfrom)
-    print str(sto)
-    #print render_template("range.html", sfrom=sfrom, sto=sto)
     return render_template("range.html", sfrom=sfrom, sto=sto)
 
 @app.route('/fs/api/v1.0/range/<sfrom>/<sto>', methods=['GET'])
 def get_range(sfrom, sto):
-    print str(sfrom)
-    print str(sto)
     dfrom = datetime.strptime(sfrom, "%Y-%m-%d %H:%M:%S")
     dto = datetime.strptime(sto, "%Y-%m-%d %H:%M:%S")
     db = Fsdb()
@@ -45,10 +42,15 @@ def get_range(sfrom, sto):
 
 @app.route('/fs/api/v1.0/pl/range/<sfrom>/<sto>', methods=['GET'])
 def get_rangePl(sfrom, sto):
-    print str(sfrom)
-    print str(sto)
     dfrom = datetime.strptime(sfrom, "%Y-%m-%d %H:%M:%S")
     dto = datetime.strptime(sto, "%Y-%m-%d %H:%M:%S")
+    db = Fsdb()
+    return jsonify(db.getRangePL(dfrom,dto))
+
+@app.route('/fs/api/v1.0/pl/range/<sfrom>', methods=['GET'])
+def get_rangeFromPl(sfrom):
+    dfrom = datetime.strptime(sfrom, "%Y-%m-%d %H:%M:%S")
+    dto = sto = datetime.now() #datetime.strptime(sto, "%Y-%m-%d %H:%M:%S")
     db = Fsdb()
     return jsonify(db.getRangePL(dfrom,dto))
 
@@ -61,7 +63,6 @@ def get_lastdays(days):
 def get_lastdaysPl(days):
     db = Fsdb()
     return jsonify(db.getLastDaysPl(days))
-    #return json.dumps(db.getLastDays(days));
 
 def get_data():
     return

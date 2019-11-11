@@ -73,8 +73,10 @@ type="text/javascript"></script>
    $.ajax({
      {% if days %}
       url: "/fs/api/v1.0/pl/lastdays/{{days}}",
-     {% elif sfrom %}
+     {% elif sto %}
       url: "/fs/api/v1.0/pl/range/{{sfrom}}/{{sto}}",
+     {% elif sfrom %}
+      url: "/fs/api/v1.0/pl/range/{{sfrom}}",
      {% endif %}
       async: true,
       timeout: 99999999,
