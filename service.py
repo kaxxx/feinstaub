@@ -3,7 +3,7 @@
 
 from flask import Flask, jsonify, json, render_template
 from fsdb import Fsdb
-from datetime import datetime
+from datetime import datetime, timedelta
 from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__, template_folder='./templates', static_folder='./static')
@@ -11,6 +11,19 @@ app = Flask(__name__, template_folder='./templates', static_folder='./static')
 @app.route("/")
 def home():
     return render_template("index.html")
+
+@app.route("/aqi.json")
+def aqidata():
+    try:
+        out = json.load(open('aqi.json'))
+    except IOError as error:
+        out = error
+
+    return jsonify(out)
+
+@app.route("/aqi.html")
+def api():
+    return render_template("aqi.html")
 
 @app.route("/plotly/<days>")
 def plotly(days):
@@ -32,6 +45,14 @@ def lastdays(days):
 @app.route("/range/<sfrom>/<sto>")
 def range(sfrom, sto):
     return render_template("range.html", sfrom=sfrom, sto=sto)
+
+@app.route('/fs/api/v1.0/aqi/data/last/days/<days>', methods=['GET'])
+def get_aqi24(days):
+    dfrom = datetime.now() - timedelta(days=int(days))
+    dto = datetime.now()
+    db = Fsdb()
+    return jsonify(db.getRange(dfrom,dto))
+
 
 @app.route('/fs/api/v1.0/range/<sfrom>/<sto>', methods=['GET'])
 def get_range(sfrom, sto):

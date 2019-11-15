@@ -3,9 +3,10 @@
   <link type="text/css" rel="stylesheet" href="{{ url_for('static',    filename='plotly.css') }}" />
 </head>
 <body>                                                                                                                            
-<script src="https://code.jquery.com/jquery-latest.js"                                                                            
-type="text/javascript"></script>                                                                                                  
+<script src="https://code.jquery.com/jquery-latest.js"  type="text/javascript"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{{ url_for('static',    filename='./aqi/aqi.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='./aqi/aqi.css') }}">
 <!--script src="./jquery.switchButton.js"></script-->
 
 <div id="meta"></div>
@@ -13,6 +14,79 @@ type="text/javascript"></script>
 <div id="ppm10" style="float:right;"></div>
 <div id="spinner"><img src="https://faviconer.net/preloaders/89/Fading%20line.gif"/></div>
 <div id="diagram"></div>
+
+<div class="container">
+    <h3><a href="https://en.wikipedia.org/wiki/Air_quality_index" target="_blank">AQI</a> <span class='time' id="time"></span></h3>
+      <div class='aqi-container' id="containerPm10">
+          <div class='aqi-label'>AQI (PM10)</div>
+          <div class='aqi' id="aqiPm10"></div>
+          <div class='pm-label' id="pm10"></div>
+      </div>
+      <div class='aqi-container' id="containerPm25">
+          <div class='aqi-label'>AQI (PM2.5)</div>
+          <div class='aqi' id="aqiPm25"></div>
+          <div class='pm-label' id="pm25"></div>
+      </div>
+    <div>
+        <table class="">
+        <caption>AQI Category, Pollutants and Health Breakpoints
+        </caption>
+        <tbody><tr>
+        <td style="background: #9cf; colour: black; font-weight:bold">AQI Category (Range)
+        </td>
+        <td style="background: #9cf; colour: black; font-weight:bold">PM<sub>10</sub> (24hr)
+        </td>
+        <td style="background: #9cf; colour: black; font-weight:bold">PM<sub>2.5</sub> (24hr)
+        </td></tr>
+        <tr>
+        <td style="background:#0c0; colour: black">Good (0–50)
+        </td>
+        <td style="background:#0c0; colour: black">0–50
+        </td>
+        <td style="background:#0c0; colour: black">0–30
+        </td></tr>
+        <tr>
+        <td style="background:#6c0; colour: black">Satisfactory (51–100)
+        </td>
+        <td style="background:#6c0; colour: black">51–100
+        </td>
+        <td style="background:#6c0; colour: black">31–60
+        </td></tr>
+        <tr>
+        <td style="background: #ff0; colour: black">Moderately polluted (101–200)
+        </td>
+        <td style="background: #ff0; colour: black">101–250
+        </td>
+        <td style="background: #ff0; colour: black">61–90
+        </td></tr>
+        <tr>
+        <td style="background: #f90; colour: black">Poor (201–300)
+        </td>
+        <td style="background: #f90; colour: black">251–350
+        </td>
+        <td style="background: #f90; colour: black">91–120
+        </td></tr>
+        <tr>
+        <td style="background:red; colour: black">Very poor (301–400)
+        </td>
+        <td style="background:red; colour: black">351–430
+        </td>
+        <td style="background:red; colour: black">121–250
+        </td></tr>
+        <tr>
+        <td style="background:brown; colour: black">Severe (401–500)
+        </td>
+        <td style="background:brown; colour: black">430+
+        </td>
+        <td style="background:brown; colour: black">250+
+        </td>
+        </tr></tbody></table>
+    </div>
+</div>
+<script type="text/javascript">
+
+</script>
+
 <script>
     var x10=new Array();
     var y10=new Array();
@@ -25,6 +99,9 @@ type="text/javascript"></script>
     $("#spinner").show();
     // start one time
     readData();
+    //AQI
+    getData({{days}});
+    //setInterval(getData, 60000);
   });
 
   $(window).resize(function(){
@@ -89,13 +166,13 @@ type="text/javascript"></script>
       x: x25,
       y: y25,
       type: 'scatter',
-      name: 'ppm2.5'
+      name: 'ppm2.5 (25)'
     };
     var trace2 = {
       x: x10,
       y: y10,
       type: 'scatter',
-      name: 'ppm10'
+      name: 'ppm10 (40)'
     };
     var data = [trace2, trace1];
     Plotly.newPlot('diagram', data);

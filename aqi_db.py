@@ -17,9 +17,9 @@ MODE_ACTIVE = 0
 MODE_QUERY = 1
 PERIOD_CONTINUOUS = 0
 
-JSON_FILE = '/var/www/html/fs2/aqi.json'
-PPM10_FILE = '/var/www/html/fs/etc/ppm10.txt'
-PPM25_FILE = '/var/www/html/fs/etc/ppm25.txt'
+JSON_FILE = './aqi.json'
+#PPM10_FILE = '/var/www/html/fs/etc/ppm10.txt'
+#PPM25_FILE = '/var/www/html/fs/etc/ppm25.txt'
 
 MQTT_HOST = ''
 MQTT_TOPIC = '/weather/particulatematter'
@@ -162,22 +162,22 @@ if __name__ == "__main__":
         pub_mqtt(jsonrow)
 
     # write old format textfiles
-    hs = open(PPM10_FILE,"a")
-    hs.write(time.strftime("%Y-%m-%d %H:%M:%S"))
-    hs.write(": ")
-    hs.write(str(values[1]))
-    hs.write("\n")
-    hs.close()
+    #hs = open(PPM10_FILE,"a")
+    #hs.write(time.strftime("%Y-%m-%d %H:%M:%S"))
+    #hs.write(": ")
+    #hs.write(str(values[1]))
+    #hs.write("\n")
+    #hs.close()
 
-    hs = open(PPM25_FILE,"a")                                                                                                       
-    hs.write(time.strftime("%Y-%m-%d %H:%M:%S"))                                                                                    
-    hs.write(": ")                                                                                                                  
-    if float(values[0]) <= float(0.0):
-        hs.write("0")
+    #hs = open(PPM25_FILE,"a")
+    #hs.write(time.strftime("%Y-%m-%d %H:%M:%S"))
+    #hs.write(": ")
+    #if float(values[0]) <= float(0.0):
+    #    hs.write("0")
 
-    hs.write(str(values[0]))                                                                                                        
-    hs.write("\n")                                                                                                                  
-    hs.close()            
+    #hs.write(str(values[0]))
+    #hs.write("\n")
+    #hs.close()
 
     restkodi(values[1],values[0])
     writeDb(values[1],values[0])

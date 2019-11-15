@@ -186,16 +186,16 @@ class Fsdb:
         print "von: " + str(dfrom)
         print "bis: " + str(dto)
 
-        data_ppm = {}
-        data_ppm['meta'] = []
+        data_ppm = []
+        #data_ppm['meta'] = []
 
         try:
             sql = "select * from readings where time between %s AND %s;"
             self.mycursor.execute(sql, (dfrom, dto))
             myresult = self.mycursor.fetchall()
-            data_ppm['meta'].append({'from': str(dfrom.strftime("%Y-%m-%d %H:%M:%S")),
-                                     'to': str(dto.strftime("%Y-%m-%d %H:%M:%S")),
-                                     'results': str(self.mycursor.rowcount)})
+            #data_ppm['meta'].append({'from': str(dfrom.strftime("%Y-%m-%d %H:%M:%S")),
+            #                         'to': str(dto.strftime("%Y-%m-%d %H:%M:%S")),
+            #                         'results': str(self.mycursor.rowcount)})
             for x in myresult:
                 self.mkjson(x, data_ppm)
                 #thread.start_new_thread(self.mkjson, (x, data_ppm, xdate))
@@ -206,11 +206,12 @@ class Fsdb:
         return data_ppm
 
     def mkjson(self, x, data_ppm):
-        dkey = x[1].strftime("%Y-%m-%d %H:%M:%S")
-        data_ppm[dkey] = []
-        data_ppm[dkey].append({
+        xtime = x[1].strftime("%Y-%m-%d %H:%M:%S")
+        #data_ppm = []
+        data_ppm.append({
              'ppm10': x[2],
-             'ppm25': x[3]
+             'ppm25': x[3],
+             'time': xtime
         })
         return data_ppm
 
