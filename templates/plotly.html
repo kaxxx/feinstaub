@@ -6,15 +6,17 @@
 <script src="https://code.jquery.com/jquery-latest.js"  type="text/javascript"></script>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="{{ url_for('static',    filename='./aqi/aqi.js') }}"></script>
+<script src="{{ url_for('static',    filename='./datetimepicker/jquery.datetimepicker.full.min.js') }}"></script>
+
 <link rel="stylesheet" href="{{ url_for('static', filename='./aqi/aqi.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='./datetimepicker/jquery.datetimepicker.min.css') }}">
 <!--script src="./jquery.switchButton.js"></script-->
 
 <div id="meta"></div>
-<div id="ppm25" style="float:left;"></div>                                                                                        
+<div id="ppm25" style="float:left;"></div>
 <div id="ppm10" style="float:right;"></div>
 <div id="spinner"><img src="https://faviconer.net/preloaders/89/Fading%20line.gif"/></div>
 <div id="diagram"></div>
-
 <div class="container">
     <h3><a href="https://en.wikipedia.org/wiki/Air_quality_index" target="_blank">AQI</a> <span class='time' id="time"></span></h3>
       <div class='aqi-container' id="containerPm10">
@@ -83,9 +85,13 @@
         </tr></tbody></table>
     </div>
 </div>
-<script type="text/javascript">
-
-</script>
+<div id="form" style="text-align: center;">
+    <label for="dvon">von:</label>
+    <input type="text" name="von" id="dvon"/>
+    <label for="dbis">bis:</label>
+    <input type="text" name="von" id="dbis"/>
+    <input type="button" id="send" value="send"/>
+</div>
 
 <script>
     var x10=new Array();
@@ -102,6 +108,10 @@
     //AQI
     getData({{days}});
     //setInterval(getData, 60000);
+    picker();
+    //$('#dvon').click(function(){
+    //    $('#dvon').datetimepicker('toggle');
+    //});
   });
 
   $(window).resize(function(){
@@ -110,6 +120,22 @@
     }
     reDrawData();
   });
+
+  function picker(){
+    $('#dvon').datetimepicker({
+        /*format: 'Y.m.d H:i'*/
+        format: 'Y-m-d H:i'
+    });
+    $('#dbis').datetimepicker({
+        format: 'Y-m-d H:i'
+    });
+    $('#send').click(sendForm);
+  }
+
+  function sendForm(){
+    var url = "/plotly/range/"+$('#dvon').val()+":00/"+$('#dbis').val()+":00"
+    window.location.href=url;
+  }
 
   function mkArray(json){
     console.log(json);
